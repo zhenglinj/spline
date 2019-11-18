@@ -16,44 +16,53 @@
 
 package za.co.absa.spline.client.web
 
+import java.lang.Boolean._
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType._
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestMapping, ResponseBody}
-import org.webjars.WebJarAssetLocator
+import org.springframework.web.bind.annotation.RequestMapping
+import org.thymeleaf.ITemplateEngine
+import org.thymeleaf.context.WebContext
+import za.co.absa.spline.client.web.WebController.{IndexPageConf, IndexPageTemplateName}
 import za.co.absa.spline.common.SplineBuildInfo
 
+import scala.collection.JavaConverters._
+
 @Controller
-class WebController @Autowired()(webJarAssetLocator: WebJarAssetLocator) {
+class WebController @Autowired()(templateEngine: ITemplateEngine) {
 
   @RequestMapping(path = Array("/"))
   def root(httpRequest: HttpServletRequest): String = s"redirect:/app/"
 
   @RequestMapping(path = Array("/app/**"), produces = Array(TEXT_HTML_VALUE))
-  @ResponseBody
-  def index(httpRequest: HttpServletRequest): String = {
-    val resourceName = webJarAssetLocator.getFullPath("index.html")
-    val resource = new ClassPathResource(resourceName)
-
-    val baseUrlPrefix = httpRequest.getContextPath
-
-    // todo: do something with it!
-    IOUtils.toString(resource.getInputStream, "UTF-8")
-      .replaceAll(
-        """<base href="/?([^"]*)">""",
-        s"""<base href="$baseUrlPrefix/$$1">""")
-      .replaceAll(
-        "PUT_YOUR_SPLINE_CONSUMER_REST_ENDPOINT_URL_HERE",
-        AppConfig.Consumer.url.toExternalForm)
-      .replaceAll(
-        """(?m)^\s*((/\*)|(\*/)|(//.*))""",
-        "")
+  def index(req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val ctx = req.getServletContext
+    val locale = req.getLocale
+    templateEngine.process(
+      IndexPageTemplateName,
+      new WebContext(req, res, ctx, locale, Map[String, AnyRef](
+        IndexPageConf.Title -> "Spline - Data Lineage Tracking And Visualization",
+        IndexPageConf.ApiUrl -> AppConfig.Consumer.url.toExternalForm,
+        IndexPageConf.EmbeddedMode -> FALSE
+      ).asJava),
+      res.getWriter)
   }
 
   @RequestMapping(path = Array("/build-info"), produces = Array("text/x-java-properties"))
   def buildInfo(res: HttpServletResponse): Unit =
     SplineBuildInfo.buildProps.store(res.getWriter, "Spline Web Client")
+}
+
+object WebController {
+
+  val IndexPageTemplateName = "index"
+
+  private object IndexPageConf {
+    val Title = "title"
+    val ApiUrl = "apiUrl"
+    val EmbeddedMode = "embeddedMode"
+  }
+
 }
