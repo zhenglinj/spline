@@ -109,7 +109,7 @@ Add a dependency on Spark Agent.
 <dependency>
     <groupId>za.co.absa.spline</groupId>
     <artifactId>spark-agent</artifactId>
-    <version>4.0.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 In your spark job you have to enable spline.
