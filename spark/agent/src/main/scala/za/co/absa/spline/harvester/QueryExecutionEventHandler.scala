@@ -25,17 +25,17 @@ import za.co.absa.spline.harvester.json.HarvesterJsonSerDe._
 import scala.language.postfixOps
 
 class QueryExecutionEventHandler(
-  harvesterFactory: LineageHarvesterFactory,
-  lineageDispatcher: LineageDispatcher,
-  sparkSession: SparkSession) {
+                                  harvesterFactory: LineageHarvesterFactory,
+                                  lineageDispatcher: LineageDispatcher,
+                                  sparkSession: SparkSession) {
 
   /**
-    * The method is executed when an action execution is successful.
-    *
-    * @param funcName   A name of the executed action.
-    * @param qe         A Spark object holding lineage information (logical, optimized, physical plan)
-    * @param durationNs Duration of the action execution [nanoseconds]
-    */
+   * The method is executed when an action execution is successful.
+   *
+   * @param funcName   A name of the executed action.
+   * @param qe         A Spark object holding lineage information (logical, optimized, physical plan)
+   * @param durationNs Duration of the action execution [nanoseconds]
+   */
   def onSuccess(funcName: String, qe: QueryExecution, durationNs: Long): Unit = {
     harvesterFactory
       .harvester(qe.analyzed, Some(qe.executedPlan), qe.sparkSession)
@@ -49,12 +49,12 @@ class QueryExecutionEventHandler(
   }
 
   /**
-    * The method is executed when an error occurs during an action execution.
-    *
-    * @param funcName  A name of the executed action.
-    * @param qe        A Spark object holding lineage information (logical, optimized, physical plan)
-    * @param exception An exception describing the reason of the error
-    */
+   * The method is executed when an error occurs during an action execution.
+   *
+   * @param funcName  A name of the executed action.
+   * @param qe        A Spark object holding lineage information (logical, optimized, physical plan)
+   * @param exception An exception describing the reason of the error
+   */
   def onFailure(funcName: String, qe: QueryExecution, exception: Exception): Unit = {
     //TODO: send exec plan and an event with the error. See: https://github.com/AbsaOSS/spline/issues/310
   }

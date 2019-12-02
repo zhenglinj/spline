@@ -96,7 +96,7 @@
                     <scalaVersion>${scala.version}</scalaVersion>
                     <args>
                         <arg>-target:jvm-${java.version}</arg>
-                        <arg>-Ybackend:GenBCode</arg>
+                        <arg>-Jbackend:GenBCode</arg>
                         <arg>-feature</arg>
                         <arg>-deprecation</arg>
                         <arg>-unchecked</arg>

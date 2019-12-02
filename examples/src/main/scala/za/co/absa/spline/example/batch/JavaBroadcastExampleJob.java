@@ -16,13 +16,17 @@
 
 package za.co.absa.spline.example.batch;
 
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import scala.reflect.ClassTag$;
 import za.co.absa.spline.harvester.SparkLineageInitializer;
 
-public class JavaExampleJob {
+import java.util.List;
+
+public class JavaBroadcastExampleJob {
 
     public static void main(String[] args) {
         SparkSession.Builder builder = SparkSession.builder();
@@ -30,6 +34,13 @@ public class JavaExampleJob {
         // configure Spline to track lineage
         SparkLineageInitializer.enableLineageTracking(session);
 
+        //TODO
+        List<Row> num2String = session.read()
+                .option("header", "true")
+                .option("inferSchema", "true")
+                .csv("examples/data/input/batch/map-broadcast.csv")
+                .collectAsList();
+        Broadcast<List<Row>> broadcast = session.sparkContext().broadcast(num2String, ClassTag$.MODULE$.apply(List.class));
         Dataset<Row> sourceDs = session.read()
                 .option("header", "true")
                 .option("inferSchema", "true")
